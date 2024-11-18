@@ -2,7 +2,9 @@
 
 import gleam/dynamic
 import gleam/json
-import gleam/option.{type Option}
+import gleam/list
+import gleam/option.{type Option, None, Some}
+import gleam/string
 
 pub type BlueskyPost {
   BlueskyPost(
@@ -55,4 +57,21 @@ pub fn post_from_json(
     )
 
   json.decode(from: json_string, using: decoder)
+}
+
+pub fn get_english_post_text(post: BlueskyPost) -> Result(String, Nil) {
+  case post.commit {
+    None -> Error(Nil)
+    Some(commit) -> {
+      case commit.record {
+        None -> Error(Nil)
+        Some(record) -> {
+          case list.find(record.langs, string.starts_with(_, "en")) {
+            Ok(_) -> Ok(record.text)
+            _ -> Error(Nil)
+          }
+        }
+      }
+    }
+  }
 }
