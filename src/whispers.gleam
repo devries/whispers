@@ -37,7 +37,6 @@ pub fn main() {
                   message_parser.get_english_post_text(post)
                   |> message_parser.filter_length_lines
                 case filtered_post {
-                  // Ok(text) -> io.println("POSTHERE: " <> text)
                   Ok(text) -> process.send(my_holder, holder.Put(text))
                   Error(Nil) -> Nil
                 }
@@ -54,7 +53,13 @@ pub fn main() {
         }
       },
     )
-    |> stratus.on_close(fn(_state) { io.println("Closed") })
+    |> stratus.on_close(fn(_state) {
+      io.println("Websocket closed")
+      process.send(
+        my_holder,
+        holder.Put("I seem to have lost my connection to Bluesky 😢."),
+      )
+    })
 
   let assert Ok(_subj) = stratus.initialize(builder)
 
@@ -67,6 +72,7 @@ pub fn main() {
   let assert Ok(_) =
     wisp_mist.handler(handler, secret_key_base)
     |> mist.new
+    |> mist.bind("::")
     |> mist.port(8080)
     |> mist.start_http
 
