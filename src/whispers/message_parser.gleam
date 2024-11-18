@@ -75,3 +75,20 @@ pub fn get_english_post_text(post: BlueskyPost) -> Result(String, Nil) {
     }
   }
 }
+
+pub fn filter_length_lines(in: Result(String, Nil)) -> Result(String, Nil) {
+  case in {
+    Error(Nil) -> Error(Nil)
+    Ok(text) -> {
+      case string.contains(does: text, contain: "\n") {
+        True -> Error(Nil)
+        False -> {
+          case string.length(text) {
+            x if x > 180 || x < 10 -> Error(Nil)
+            _ -> Ok(text)
+          }
+        }
+      }
+    }
+  }
+}
