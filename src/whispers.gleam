@@ -5,9 +5,14 @@ import gleam/io
 import gleam/option.{None}
 import gleam/otp/actor
 import gleam/string
+import mist
 import stratus
 import whispers/holder
 import whispers/message_parser
+import whispers/router
+import whispers/web.{Context}
+import wisp
+import wisp/wisp_mist
 
 pub fn main() {
   io.println("Starting")
@@ -53,8 +58,20 @@ pub fn main() {
 
   let assert Ok(_subj) = stratus.initialize(builder)
 
-  // process.sleep_forever()
-  get_values_slowly(my_holder, 2000)
+  wisp.configure_logger()
+  let secret_key_base = wisp.random_string(64)
+
+  let ctx = Context(static_directory: static_directory(), my_holder: my_holder)
+  let handler = router.handle_request(_, ctx)
+
+  let assert Ok(_) =
+    wisp_mist.handler(handler, secret_key_base)
+    |> mist.new
+    |> mist.port(8080)
+    |> mist.start_http
+
+  process.sleep_forever()
+  // get_values_slowly(my_holder, 2000)
 }
 
 fn get_values_slowly(
@@ -67,4 +84,9 @@ fn get_values_slowly(
     Error(Nil) -> io.println("No message available")
   }
   get_values_slowly(my_holder, sleep_time)
+}
+
+pub fn static_directory() -> String {
+  let assert Ok(priv_directory) = wisp.priv_directory("whispers")
+  priv_directory <> "/static"
 }
