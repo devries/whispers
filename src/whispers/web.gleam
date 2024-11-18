@@ -73,7 +73,7 @@ pub fn detail_log_request(
   let now = birl.now()
 
   let client_ip = {
-    case list.key_find(req.headers, "X-Forwarded-For") {
+    case list.key_find(req.headers, "x-forwarded-for") {
       Ok(ip) -> ip
       Error(_) -> "unknown_ip"
     }
