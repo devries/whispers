@@ -33,10 +33,7 @@ pub fn main() {
           stratus.Text(msg) -> {
             case message_parser.post_from_json(msg) {
               Ok(post) -> {
-                let filtered_post =
-                  message_parser.get_english_post_text(post)
-                  |> message_parser.filter_length_lines
-                case filtered_post {
+                case message_parser.get_filtered_text(post) {
                   Ok(text) -> process.send(my_holder, holder.Put(text))
                   Error(Nil) -> Nil
                 }

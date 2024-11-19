@@ -4,6 +4,7 @@ import gleam/dynamic
 import gleam/json
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/string
 
 pub type BlueskyPost {
@@ -59,36 +60,24 @@ pub fn post_from_json(
   json.decode(from: json_string, using: decoder)
 }
 
-pub fn get_english_post_text(post: BlueskyPost) -> Result(String, Nil) {
-  case post.commit {
-    None -> Error(Nil)
-    Some(commit) -> {
-      case commit.record {
-        None -> Error(Nil)
-        Some(record) -> {
-          case list.find(record.langs, string.starts_with(_, "en")) {
-            Ok(_) -> Ok(record.text)
-            _ -> Error(Nil)
-          }
-        }
-      }
-    }
-  }
-}
+pub fn get_filtered_text(post: BlueskyPost) -> Result(String, Nil) {
+  use commit <- result.try(option.to_result(post.commit, Nil))
+  use record <- result.try(option.to_result(commit.record, Nil))
 
-pub fn filter_length_lines(in: Result(String, Nil)) -> Result(String, Nil) {
-  case in {
-    Error(Nil) -> Error(Nil)
-    Ok(text) -> {
-      case string.contains(does: text, contain: "\n") {
-        True -> Error(Nil)
-        False -> {
-          case string.length(text) {
-            x if x > 180 || x < 10 -> Error(Nil)
-            _ -> Ok(text)
-          }
-        }
-      }
-    }
+  let text_result = case list.find(record.langs, string.starts_with(_, "en")) {
+    Ok(_) -> Ok(record.text)
+    _ -> Error(Nil)
+  }
+  use text <- result.try(text_result)
+
+  let singleline_result = case string.contains(does: text, contain: "\n") {
+    True -> Error(Nil)
+    False -> Ok(text)
+  }
+  use singleline <- result.try(singleline_result)
+
+  case string.length(singleline) {
+    x if x > 180 || x < 10 -> Error(Nil)
+    _ -> Ok(text)
   }
 }

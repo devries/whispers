@@ -46,17 +46,17 @@ pub fn delete_decode_test() {
 
 pub fn extract_text_test() {
   let assert Ok(parsed_post) = message_parser.post_from_json(testpost_post)
-  message_parser.get_english_post_text(parsed_post)
+  message_parser.get_filtered_text(parsed_post)
   |> should.equal(Ok(
     "😂😂 omg I’m sorry, I didn’t mean to call you out. Is your air sign Libra?",
   ))
 
   let assert Ok(parsed_account) =
     message_parser.post_from_json(testpost_account)
-  message_parser.get_english_post_text(parsed_account)
+  message_parser.get_filtered_text(parsed_account)
   |> should.equal(Error(Nil))
 
   let assert Ok(parsed_delete) = message_parser.post_from_json(testpost_delete)
-  message_parser.get_english_post_text(parsed_delete)
+  message_parser.get_filtered_text(parsed_delete)
   |> should.equal(Error(Nil))
 }
