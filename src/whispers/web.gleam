@@ -15,6 +15,8 @@ pub type Context {
   Context(static_directory: String, my_holder: process.Subject(holder.Message))
 }
 
+// The middleware hangs on to the context and set up logging and some defaults
+// as well as logging. It also serves the static content.
 pub fn middleware(
   req: wisp.Request,
   ctx: Context,
@@ -29,6 +31,8 @@ pub fn middleware(
   handle_request(req)
 }
 
+// I am using nakai to build my HTML. This is a relatively simple main index
+// page.
 pub fn full_page() -> StringBuilder {
   html.div(
     [
@@ -54,6 +58,8 @@ pub fn full_page() -> StringBuilder {
   |> nakai.to_string_builder
 }
 
+// This HTML fragment has the post text within a div with a class attribute
+// for styling. It's also built with nakai.
 pub fn quote_html(ctx: Context) -> StringBuilder {
   let text = case process.call(ctx.my_holder, holder.Get, 100) {
     Ok(v) -> v
@@ -64,6 +70,8 @@ pub fn quote_html(ctx: Context) -> StringBuilder {
   |> nakai.to_inline_string_builder
 }
 
+// I also decided it might be fun to just grab the text. I add a newline so
+// that I can display it easily in bash. 
 pub fn quote_text(ctx: Context) -> String {
   case process.call(ctx.my_holder, holder.Get, 100) {
     Ok(v) -> v <> "\n"
@@ -71,6 +79,9 @@ pub fn quote_text(ctx: Context) -> String {
   }
 }
 
+// For logging I assume this exists behind a proxy so I can pull the IP address
+// from the X-Forwarded-For header. I log at the info level the date, IP, response
+// status code, request method, and path.
 pub fn detail_log_request(
   req: wisp.Request,
   handler: fn() -> wisp.Response,

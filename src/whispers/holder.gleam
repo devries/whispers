@@ -1,3 +1,6 @@
+// This is an actor which can accept and return text messages.
+// The bluesky posts are stored in the holder as they come in
+// and pulled when the web endpoints are invoked.
 import gleam/erlang/process.{type Subject}
 import gleam/otp/actor
 

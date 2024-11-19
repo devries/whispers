@@ -17,8 +17,10 @@ import wisp/wisp_mist
 pub fn main() {
   io.println("Starting")
 
+  // Holder is an actor what will keep the latest post from bluesky
   let assert Ok(my_holder) = actor.start(Error(Nil), holder.handle_message)
 
+  // Create websocket connection to stream the posts from bluesky.
   let assert Ok(req) =
     request.to("https://jetstream1.us-east.bsky.network/subscribe")
   let req =
@@ -33,16 +35,13 @@ pub fn main() {
           stratus.Text(msg) -> {
             case message_parser.post_from_json(msg) {
               Ok(post) -> {
+                // The post will be filtered for length, style, and language
                 case message_parser.get_filtered_text(post) {
                   Ok(text) -> process.send(my_holder, holder.Put(text))
                   Error(Nil) -> Nil
                 }
               }
-              Error(_e) -> {
-                // io.debug(e)
-                // io.println(msg)
-                Nil
-              }
+              Error(_e) -> Nil
             }
             actor.continue(state)
           }
@@ -52,6 +51,8 @@ pub fn main() {
     )
     |> stratus.on_close(fn(_state) {
       io.println("Websocket closed")
+      // In case of a socket disconnect, leave a message indicating the
+      // error on the website. Will explore reconnecting at some point.
       process.send(
         my_holder,
         holder.Put("I seem to have lost my connection to Bluesky 😢."),
@@ -60,6 +61,7 @@ pub fn main() {
 
   let assert Ok(_subj) = stratus.initialize(builder)
 
+  // Set up the web server process
   wisp.configure_logger()
   let secret_key_base = wisp.random_string(64)
 
@@ -77,6 +79,7 @@ pub fn main() {
   // get_values_slowly(my_holder, 2000)
 }
 
+// This is a debug function to periodically print messages from the holder.
 fn get_values_slowly(
   my_holder: process.Subject(holder.Message),
   sleep_time: Int,
@@ -89,6 +92,7 @@ fn get_values_slowly(
   get_values_slowly(my_holder, sleep_time)
 }
 
+// Static directory locator for wisp.
 pub fn static_directory() -> String {
   let assert Ok(priv_directory) = wisp.priv_directory("whispers")
   priv_directory <> "/static"

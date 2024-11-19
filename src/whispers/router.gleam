@@ -2,6 +2,10 @@ import gleam/http.{Get}
 import whispers/web.{type Context}
 import wisp.{type Request, type Response}
 
+// Our basic endpoints are
+// - /      : The main index page.
+// - /quote : An HTML fragment containing the post.
+// - /text  : A text/plain endpoint for grabbing posts.
 pub fn handle_request(req: Request, ctx: Context) -> Response {
   use req <- web.middleware(req, ctx)
 
