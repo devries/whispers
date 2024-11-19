@@ -8,6 +8,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req) {
     [] -> main_page(req)
     ["quote"] -> quote_response(req, ctx)
+    ["text"] -> text_response(req, ctx)
     _ -> wisp.not_found()
   }
 }
@@ -27,4 +28,14 @@ fn quote_response(req: Request, ctx: Context) -> Response {
   wisp.ok()
   |> wisp.set_header("cache-control", "no-cache, no-store")
   |> wisp.html_body(fragment)
+}
+
+fn text_response(req: Request, ctx: Context) -> Response {
+  use <- wisp.require_method(req, Get)
+
+  let value = web.quote_text(ctx)
+  wisp.ok()
+  |> wisp.set_header("cache-control", "no-cache, no-store")
+  |> wisp.set_header("content-type", "text/plain; charset=utf-8")
+  |> wisp.string_body(value)
 }

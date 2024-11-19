@@ -64,6 +64,13 @@ pub fn quote_html(ctx: Context) -> StringBuilder {
   |> nakai.to_inline_string_builder
 }
 
+pub fn quote_text(ctx: Context) -> String {
+  case process.call(ctx.my_holder, holder.Get, 100) {
+    Ok(v) -> v <> "\n"
+    Error(Nil) -> "No message available\n"
+  }
+}
+
 pub fn detail_log_request(
   req: wisp.Request,
   handler: fn() -> wisp.Response,
