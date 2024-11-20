@@ -20,3 +20,7 @@ pub fn handle_message(message: Message, current: Result(String, Nil)) {
     Shutdown -> actor.Stop(process.Normal)
   }
 }
+
+pub fn new() {
+  actor.start(Error(Nil), handle_message)
+}

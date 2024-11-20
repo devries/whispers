@@ -18,7 +18,7 @@ pub fn main() {
   io.println("Starting")
 
   // Holder is an actor what will keep the latest post from bluesky
-  let assert Ok(my_holder) = actor.start(Error(Nil), holder.handle_message)
+  let assert Ok(my_holder) = holder.new()
 
   // Create websocket connection to stream the posts from bluesky.
   let assert Ok(req) =
