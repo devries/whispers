@@ -26,40 +26,7 @@ pub fn main() {
   let req =
     req |> request.set_query([#("wantedCollections", "app.bsky.feed.post")])
 
-  let builder =
-    stratus.websocket(
-      request: req,
-      init: fn() { #(Nil, None) },
-      loop: fn(msg, state, _conn) {
-        case msg {
-          stratus.Text(msg) -> {
-            case message_parser.post_from_json(msg) {
-              Ok(post) -> {
-                // The post will be filtered for length, style, and language
-                case message_parser.get_filtered_text(post) {
-                  Ok(text) -> process.send(my_holder, holder.Put(text))
-                  Error(Nil) -> Nil
-                }
-              }
-              Error(_e) -> Nil
-            }
-            actor.continue(state)
-          }
-          _ -> actor.continue(state)
-        }
-      },
-    )
-    |> stratus.on_close(fn(_state) {
-      io.println("Websocket closed")
-      // In case of a socket disconnect, leave a message indicating the
-      // error on the website. Will explore reconnecting at some point.
-      process.send(
-        my_holder,
-        holder.Put("I seem to have lost my connection to Bluesky 😢."),
-      )
-    })
-
-  let assert Ok(_subj) = stratus.initialize(builder)
+  new_websocket(req, my_holder)
 
   // Set up the web server process
   wisp.configure_logger()
@@ -96,4 +63,49 @@ fn get_values_slowly(
 pub fn static_directory() -> String {
   let assert Ok(priv_directory) = wisp.priv_directory("whispers")
   priv_directory <> "/static"
+}
+
+// Websocket constructor
+pub fn new_websocket(
+  req: request.Request(String),
+  my_holder: process.Subject(holder.Message),
+) {
+  let builder =
+    stratus.websocket(
+      request: req,
+      init: fn() { #(Nil, None) },
+      loop: fn(msg, state, _conn) {
+        case msg {
+          stratus.Text(msg) -> {
+            case message_parser.post_from_json(msg) {
+              Ok(post) -> {
+                // The post will be filtered for length, style, and language
+                case message_parser.get_filtered_text(post) {
+                  Ok(text) -> process.send(my_holder, holder.Put(text))
+                  Error(Nil) -> Nil
+                }
+              }
+              Error(_e) -> Nil
+            }
+            actor.continue(state)
+          }
+          _ -> actor.continue(state)
+        }
+      },
+    )
+    |> stratus.on_close(fn(_state) {
+      io.println("Websocket closed")
+      // In case of a socket disconnect, leave a message indicating the
+      // error on the website. Will explore reconnecting at some point.
+      process.send(
+        my_holder,
+        holder.Put("I seem to have lost my connection to Bluesky 😢."),
+      )
+
+      process.sleep(1000)
+      new_websocket(req, my_holder)
+    })
+
+  let assert Ok(_) = stratus.initialize(builder)
+  Nil
 }
