@@ -1,3 +1,4 @@
+import birl
 import gleam/erlang/process
 import gleam/http/request
 import gleam/int
@@ -15,7 +16,10 @@ import wisp
 import wisp/wisp_mist
 
 pub fn main() {
-  io.println("Starting")
+  // We'll start out with the wisp logger so we can use it throughout
+  // the program
+  wisp.configure_logger()
+  log_info("Starting")
 
   // Holder is an actor what will keep the latest post from bluesky
   let assert Ok(my_holder) = holder.new()
@@ -29,7 +33,6 @@ pub fn main() {
   new_websocket(req, my_holder)
 
   // Set up the web server process
-  wisp.configure_logger()
   let secret_key_base = wisp.random_string(64)
 
   let ctx = Context(static_directory: static_directory(), my_holder: my_holder)
@@ -42,6 +45,7 @@ pub fn main() {
     |> mist.port(8080)
     |> mist.start_http
 
+  log_info("Listening on port 8080")
   process.sleep_forever()
   // get_values_slowly(my_holder, 2000)
 }
@@ -94,7 +98,7 @@ pub fn new_websocket(
       },
     )
     |> stratus.on_close(fn(_state) {
-      io.println("Websocket closed")
+      log_warning("Websocket closed!")
       // In case of a socket disconnect, leave a message indicating the
       // error on the website. Will explore reconnecting at some point.
       process.send(
@@ -106,6 +110,23 @@ pub fn new_websocket(
       new_websocket(req, my_holder)
     })
 
+  log_info("Connecting to websocket")
   let assert Ok(_) = stratus.initialize(builder)
   Nil
+}
+
+fn log_info(message: String) {
+  let now = birl.now()
+
+  [birl.to_iso8601(now), " ", message]
+  |> string.concat
+  |> wisp.log_info
+}
+
+fn log_warning(message: String) {
+  let now = birl.now()
+
+  [birl.to_iso8601(now), " ", message]
+  |> string.concat
+  |> wisp.log_warning
 }
