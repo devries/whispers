@@ -72,7 +72,7 @@ pub fn full_page() -> StringBuilder {
         html.meta([attr.name("twitter:image"), attr.content(image_url)]),
         html.meta([attr.name("og:image"), attr.content(image_url)]),
         html.link([attr.rel("icon"), attr.href("static/img/favicon.png")]),
-        // Userful stuff
+        // Useful stuff
         html.link([attr.rel("stylesheet"), attr.href("static/css/space.css")]),
         html.Element("script", [attr.src("static/js/htmx.min.js")], []),
       ]),
