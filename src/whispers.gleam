@@ -111,8 +111,13 @@ pub fn new_websocket(
     })
 
   log_info("Connecting to websocket")
-  let assert Ok(_) = stratus.initialize(builder)
-  Nil
+  case stratus.initialize(builder) {
+    Ok(_) -> Nil
+    Error(_) -> {
+      process.sleep(5000)
+      new_websocket(req, my_holder)
+    }
+  }
 }
 
 fn log_info(message: String) {
