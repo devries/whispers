@@ -34,6 +34,11 @@ pub fn middleware(
 // I am using nakai to build my HTML. This is a relatively simple main index
 // page.
 pub fn full_page() -> StringBuilder {
+  let url = "https://whispers.unnecessary.tech"
+  let title = "Whispers in the Dark"
+  let description = "Real-time text-only posts from Bluesky"
+  let image_url = url <> "/static/img/whispers.png"
+
   html.div(
     [
       attr.class("pane"),
@@ -43,13 +48,31 @@ pub fn full_page() -> StringBuilder {
     ],
     [
       html.Head([
+        // Boilderplate
         html.meta([attr.http_equiv("X-UA-Compatible"), attr.content("IE=edge")]),
         html.meta([
           attr.name("viewport"),
           attr.content("width=device-width, initial-scale=1"),
         ]),
-        html.title("Whispers in the Dark"),
+        html.title(title),
+        // Opengraph/twitter stuff
+        html.meta([attr.name("og:url"), attr.content(url)]),
+        html.meta([attr.name("og:type"), attr.content("website")]),
+        html.meta([attr.name("title"), attr.content(title)]),
+        html.meta([attr.name("og:title"), attr.content(title)]),
+        html.meta([attr.name("twitter:title"), attr.content(title)]),
+        html.meta([attr.name("og:site_name"), attr.content(title)]),
+        html.meta([attr.name("description"), attr.content(description)]),
+        html.meta([attr.name("twitter:description"), attr.content(description)]),
+        html.meta([attr.name("og:description"), attr.content(description)]),
+        html.meta([
+          attr.name("twitter:card"),
+          attr.content("summary_large_image"),
+        ]),
+        html.meta([attr.name("twitter:image"), attr.content(image_url)]),
+        html.meta([attr.name("og:image"), attr.content(image_url)]),
         html.link([attr.rel("icon"), attr.href("static/img/favicon.png")]),
+        // Userful stuff
         html.link([attr.rel("stylesheet"), attr.href("static/css/space.css")]),
         html.Element("script", [attr.src("static/js/htmx.min.js")], []),
       ]),
