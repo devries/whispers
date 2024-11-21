@@ -113,7 +113,10 @@ pub fn new_websocket(
   log_info("Connecting to websocket")
   case stratus.initialize(builder) {
     Ok(_) -> Nil
-    Error(_) -> {
+    Error(socket_error) -> {
+      log_warning(
+        "Websocket initialization failure: " <> string.inspect(socket_error),
+      )
       process.sleep(5000)
       new_websocket(req, my_holder)
     }
