@@ -99,14 +99,22 @@ pub fn new_websocket(
     )
     |> stratus.on_close(fn(_state) {
       log_warning("Websocket closed!")
-      // In case of a socket disconnect, leave a message indicating the
-      // error on the website. Will explore reconnecting at some point.
       process.send(
         my_holder,
         holder.Put("I seem to have lost my connection to Bluesky 😢."),
       )
 
       process.sleep(1000)
+      new_websocket(req, my_holder)
+    })
+    |> stratus.on_handshake_error(fn(_) {
+      log_warning("Handshake error!")
+      process.send(
+        my_holder,
+        holder.Put("I seem to have lost my connection to Bluesky 😢."),
+      )
+
+      process.sleep(10_000)
       new_websocket(req, my_holder)
     })
 
