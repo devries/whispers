@@ -1,8 +1,11 @@
 import birl
+import gleam/bytes_builder
 import gleam/erlang/process
 import gleam/http
+import gleam/http/request
 import gleam/int
 import gleam/list
+import gleam/result
 import gleam/string
 import gleam/string_builder.{type StringBuilder}
 import nakai
@@ -120,18 +123,38 @@ pub fn detail_log_request(
     }
   }
 
+  let user_agent = request.get_header(req, "user-agent") |> result.unwrap("")
+  let response_size = case get_body_size(response.body) {
+    Ok(n) -> int.to_string(n)
+    Error(Nil) -> "Unknown"
+  }
+
   [
     birl.to_iso8601(now),
     " ",
     client_ip,
-    " ",
-    int.to_string(response.status),
-    " ",
+    " - ",
     string.uppercase(http.method_to_string(req.method)),
     " ",
     req.path,
+    " ",
+    int.to_string(response.status),
+    " ",
+    response_size,
+    " \"",
+    user_agent,
+    "\"",
   ]
   |> string.concat
   |> wisp.log_info
   response
+}
+
+fn get_body_size(body: wisp.Body) -> Result(Int, Nil) {
+  case body {
+    wisp.Text(sb) -> Ok(string_builder.byte_size(sb))
+    wisp.Bytes(bb) -> Ok(bytes_builder.byte_size(bb))
+    wisp.File(_) -> Error(Nil)
+    wisp.Empty -> Ok(0)
+  }
 }

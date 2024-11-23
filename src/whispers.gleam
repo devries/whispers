@@ -28,7 +28,12 @@ pub fn main() {
   let assert Ok(req) =
     request.to("https://jetstream1.us-east.bsky.network/subscribe")
   let req =
-    req |> request.set_query([#("wantedCollections", "app.bsky.feed.post")])
+    req
+    |> request.set_header(
+      "user-agent",
+      "Whispers in the Dark (https://github.com/devries/whispers)",
+    )
+    |> request.set_query([#("wantedCollections", "app.bsky.feed.post")])
 
   new_websocket(req, my_holder)
 
