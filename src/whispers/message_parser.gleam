@@ -27,7 +27,7 @@ pub type BlueskyCommit {
 }
 
 pub type BlueskyRecord {
-  BlueskyRecord(rtype: String, langs: List(String), text: String)
+  BlueskyRecord(rtype: String, langs: Option(List(String)), text: String)
 }
 
 pub fn record_decoder(
@@ -36,7 +36,7 @@ pub fn record_decoder(
   dynamic.decode3(
     BlueskyRecord,
     dynamic.field("$type", of: dynamic.string),
-    dynamic.field("langs", of: dynamic.list(dynamic.string)),
+    dynamic.optional_field("langs", of: dynamic.list(dynamic.string)),
     dynamic.field("text", of: dynamic.string),
   )(v)
 }
@@ -77,8 +77,9 @@ pub fn post_from_json(
 pub fn get_filtered_text(post: BlueskyPost) -> Result(String, Nil) {
   use commit <- result.try(option.to_result(post.commit, Nil))
   use record <- result.try(option.to_result(commit.record, Nil))
+  use langs <- result.try(option.to_result(record.langs, Nil))
 
-  let text_result = case list.find(record.langs, string.starts_with(_, "en")) {
+  let text_result = case list.find(langs, string.starts_with(_, "en")) {
     Ok(_) -> Ok(record.text)
     _ -> Error(Nil)
   }

@@ -19,6 +19,9 @@ pub fn main() {
   // We'll start out with the wisp logger so we can use it throughout
   // the program
   wisp.configure_logger()
+  // Uncomment below for debug logging
+  // wisp.set_logger_level(wisp.DebugLevel)
+
   log_info("Starting")
 
   // Holder is an actor what will keep the latest post from bluesky
@@ -94,7 +97,8 @@ pub fn new_websocket(
                   Error(Nil) -> Nil
                 }
               }
-              Error(_e) -> Nil
+              Error(e) ->
+                log_debug("Error: " <> string.inspect(e) <> " on: " <> msg)
             }
             actor.continue(state)
           }
@@ -134,6 +138,14 @@ pub fn new_websocket(
       new_websocket(req, my_holder)
     }
   }
+}
+
+fn log_debug(message: String) {
+  let now = birl.now()
+
+  [birl.to_iso8601(now), " ", message]
+  |> string.concat
+  |> wisp.log_debug
 }
 
 fn log_info(message: String) {

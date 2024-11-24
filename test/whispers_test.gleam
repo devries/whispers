@@ -23,7 +23,8 @@ pub fn post_decode_test() {
   let assert Ok(parsed) = message_parser.post_from_json(testpost_post)
   let assert Some(commit) = parsed.commit
   let assert Some(record) = commit.record
-  record.langs |> should.equal(["en"])
+  let assert Some(langs) = record.langs
+  langs |> should.equal(["en"])
   record.rtype |> should.equal("app.bsky.feed.post")
   record.text
   |> should.equal(
