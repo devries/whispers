@@ -5,8 +5,10 @@ import gleam/int
 import gleam/io
 import gleam/option.{None}
 import gleam/otp/actor
+import gleam/result
 import gleam/string
 import mist
+import promgleam/metrics/counter.{create_counter, increment_counter}
 import stratus
 import whispers/holder
 import whispers/message_parser
@@ -23,6 +25,15 @@ pub fn main() {
   // wisp.set_logger_level(wisp.DebugLevel)
 
   log_info("Starting")
+
+  // Create a prometheus counter to hold the count of posts
+  let assert Ok(Nil) =
+    create_counter(
+      registry: "default",
+      name: "bluesky_posts_total",
+      help: "Total number of posts seen",
+      labels: [],
+    )
 
   // Holder is an actor what will keep the latest post from bluesky
   let assert Ok(my_holder) = holder.new()
@@ -92,6 +103,7 @@ pub fn new_websocket(
             case message_parser.post_from_json(msg) {
               Ok(post) -> {
                 // The post will be filtered for length, style, and language
+                let _ = increment_post_count(post)
                 case message_parser.get_filtered_text(post) {
                   Ok(text) -> process.send(my_holder, holder.Put(text))
                   Error(Nil) -> Nil
@@ -162,4 +174,20 @@ fn log_warning(message: String) {
   [birl.to_iso8601(now), " ", message]
   |> string.concat
   |> wisp.log_warning
+}
+
+fn increment_post_count(post: message_parser.BlueskyPost) -> Result(Nil, Nil) {
+  use commit <- result.try(option.to_result(post.commit, Nil))
+  use _ <- result.try(option.to_result(commit.record, Nil))
+  let inc =
+    increment_counter(
+      registry: "default",
+      name: "bluesky_posts_total",
+      labels: [],
+      value: 1,
+    )
+  case inc {
+    Ok(_) -> Ok(Nil)
+    Error(_) -> Error(Nil)
+  }
 }

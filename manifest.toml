@@ -22,6 +22,9 @@ packages = [
   { name = "mist", version = "3.0.0", build_tools = ["gleam"], requirements = ["birl", "gleam_erlang", "gleam_http", "gleam_otp", "gleam_stdlib", "glisten", "gramps", "hpack_erl", "logging"], otp_app = "mist", source = "hex", outer_checksum = "CDA1A74E768419235E16886463EC4722EFF4AB3F8D820A76EAD45D7C167D7282" },
   { name = "nakai", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "nakai", source = "hex", outer_checksum = "FD55B7926640FFD21FCC048D7E21752ED94FD424E1A731DC5C9DFB9928007F08" },
   { name = "platform", version = "1.0.0", build_tools = ["gleam"], requirements = [], otp_app = "platform", source = "hex", outer_checksum = "8339420A95AD89AAC0F82F4C3DB8DD401041742D6C3F46132A8739F6AEB75391" },
+  { name = "prometheus", version = "4.11.0", build_tools = ["rebar3", "mix"], requirements = ["quantile_estimator"], otp_app = "prometheus", source = "hex", outer_checksum = "719862351AABF4DF7079B05DC085D2BBCBE3AC0AC3009E956671B1D5AB88247D" },
+  { name = "promgleam", version = "0.2.0", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_stdlib", "prometheus"], otp_app = "promgleam", source = "hex", outer_checksum = "DBCAD0C98BD763524A9FFEB34798791C5921F335CF04A1258CA7FB8CBDD20AFB" },
+  { name = "quantile_estimator", version = "0.2.1", build_tools = ["rebar3"], requirements = [], otp_app = "quantile_estimator", source = "hex", outer_checksum = "282A8A323CA2A845C9E6F787D166348F776C1D4A41EDE63046D72D422E3DA946" },
   { name = "ranger", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "ranger", source = "hex", outer_checksum = "1566C272B1D141B3BBA38B25CB761EF56E312E79EC0E2DFD4D3C19FB0CC1F98C" },
   { name = "simplifile", version = "2.2.0", build_tools = ["gleam"], requirements = ["filepath", "gleam_stdlib"], otp_app = "simplifile", source = "hex", outer_checksum = "0DFABEF7DC7A9E2FF4BB27B108034E60C81BEBFCB7AB816B9E7E18ED4503ACD8" },
   { name = "stratus", version = "0.9.3", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_erlang", "gleam_http", "gleam_otp", "gleam_stdlib", "gramps", "logging"], otp_app = "stratus", source = "hex", outer_checksum = "EE174D2E0429A7BAE6F25FC3F7A669E1456F66DD65B45E01BD1DFD37C57385F9" },
@@ -39,5 +42,6 @@ gleam_stdlib = { version = ">= 0.34.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 mist = { version = ">= 3.0.0 and < 4.0.0" }
 nakai = { version = ">= 1.0.0 and < 2.0.0" }
+promgleam = { version = ">= 0.2.0 and < 1.0.0" }
 stratus = { version = ">= 0.9.3 and < 1.0.0" }
 wisp = { version = ">= 1.2.0 and < 2.0.0" }

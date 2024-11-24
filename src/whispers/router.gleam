@@ -1,4 +1,5 @@
 import gleam/http.{Get}
+import promgleam/registry.{print_as_text}
 import whispers/web.{type Context}
 import wisp.{type Request, type Response}
 
@@ -13,6 +14,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     [] -> main_page(req)
     ["quote"] -> quote_response(req, ctx)
     ["text"] -> text_response(req, ctx)
+    ["metrics"] -> print_metrics(req)
     _ -> wisp.not_found()
   }
 }
@@ -42,4 +44,13 @@ fn text_response(req: Request, ctx: Context) -> Response {
   |> wisp.set_header("cache-control", "no-cache, no-store")
   |> wisp.set_header("content-type", "text/plain; charset=utf-8")
   |> wisp.string_body(value)
+}
+
+fn print_metrics(req: Request) -> Response {
+  use <- wisp.require_method(req, Get)
+
+  let body = print_as_text("default")
+
+  wisp.ok()
+  |> wisp.string_body(body)
 }
