@@ -3,6 +3,7 @@ import gleam/erlang/process
 import gleam/http/request
 import gleam/int
 import gleam/io
+import gleam/list
 import gleam/option.{None}
 import gleam/otp/actor
 import gleam/result
@@ -33,6 +34,14 @@ pub fn main() {
       name: "bluesky_posts_total",
       help: "Total number of posts seen",
       labels: [],
+    )
+
+  let assert Ok(Nil) =
+    create_counter(
+      registry: "default",
+      name: "bluesky_tags_total",
+      help: "Total number of hashtags seen",
+      labels: ["value"],
     )
 
   // Holder is an actor what will keep the latest post from bluesky
@@ -179,15 +188,22 @@ fn log_warning(message: String) {
 fn increment_post_count(post: message_parser.BlueskyPost) -> Result(Nil, Nil) {
   use commit <- result.try(option.to_result(post.commit, Nil))
   use _ <- result.try(option.to_result(commit.record, Nil))
-  let inc =
+  let _ =
     increment_counter(
       registry: "default",
       name: "bluesky_posts_total",
       labels: [],
       value: 1,
     )
-  case inc {
-    Ok(_) -> Ok(Nil)
-    Error(_) -> Error(Nil)
-  }
+  message_parser.get_tags(post)
+  |> list.map(fn(t) {
+    let _ =
+      increment_counter(
+        registry: "default",
+        name: "bluesky_tags_total",
+        labels: [t],
+        value: 1,
+      )
+  })
+  Ok(Nil)
 }

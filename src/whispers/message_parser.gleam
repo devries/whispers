@@ -27,17 +27,72 @@ pub type BlueskyCommit {
 }
 
 pub type BlueskyRecord {
-  BlueskyRecord(rtype: String, langs: Option(List(String)), text: String)
+  BlueskyRecord(
+    rtype: String,
+    langs: Option(List(String)),
+    text: String,
+    facets: Option(List(BlueskyFacet)),
+  )
+}
+
+pub type BlueskyFacet {
+  BlueskyFacet(index: BlueskyIndex, features: List(BlueskyFeature))
+}
+
+pub type BlueskyIndex {
+  BlueskyIndex(byte_start: Int, byte_end: Int)
+}
+
+pub type BlueskyFeature {
+  BlueskyFeature(
+    rtype: String,
+    did: Option(String),
+    uri: Option(String),
+    tag: Option(String),
+  )
 }
 
 pub fn record_decoder(
   v: dynamic.Dynamic,
 ) -> Result(BlueskyRecord, List(dynamic.DecodeError)) {
-  dynamic.decode3(
+  dynamic.decode4(
     BlueskyRecord,
     dynamic.field("$type", of: dynamic.string),
     dynamic.optional_field("langs", of: dynamic.list(dynamic.string)),
     dynamic.field("text", of: dynamic.string),
+    dynamic.optional_field("facets", of: dynamic.list(facet_decoder)),
+  )(v)
+}
+
+pub fn facet_decoder(
+  v: dynamic.Dynamic,
+) -> Result(BlueskyFacet, List(dynamic.DecodeError)) {
+  dynamic.decode2(
+    BlueskyFacet,
+    dynamic.field("index", of: index_decoder),
+    dynamic.field("features", of: dynamic.list(feature_decoder)),
+  )(v)
+}
+
+pub fn index_decoder(
+  v: dynamic.Dynamic,
+) -> Result(BlueskyIndex, List(dynamic.DecodeError)) {
+  dynamic.decode2(
+    BlueskyIndex,
+    dynamic.field("byteStart", dynamic.int),
+    dynamic.field("byteEnd", dynamic.int),
+  )(v)
+}
+
+pub fn feature_decoder(
+  v: dynamic.Dynamic,
+) -> Result(BlueskyFeature, List(dynamic.DecodeError)) {
+  dynamic.decode4(
+    BlueskyFeature,
+    dynamic.field("$type", of: dynamic.string),
+    dynamic.optional_field("did", dynamic.string),
+    dynamic.optional_field("uri", dynamic.string),
+    dynamic.optional_field("tag", dynamic.string),
   )(v)
 }
 
@@ -95,4 +150,23 @@ pub fn get_filtered_text(post: BlueskyPost) -> Result(String, Nil) {
     x if x > 180 || x < 10 -> Error(Nil)
     _ -> Ok(text)
   }
+}
+
+pub fn get_tags(post: BlueskyPost) -> List(String) {
+  option.unwrap(
+    {
+      use commit <- option.then(post.commit)
+      use record <- option.then(commit.record)
+      use facets <- option.then(record.facets)
+
+      option.Some(list.map(facets, get_tags_from_facet) |> list.flatten)
+    },
+    [],
+  )
+}
+
+pub fn get_tags_from_facet(facet: BlueskyFacet) -> List(String) {
+  facet.features
+  |> list.map(fn(feature) { feature.tag })
+  |> option.values
 }

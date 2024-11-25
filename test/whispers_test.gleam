@@ -13,6 +13,8 @@ const testpost_account = "{\"did\":\"did:plc:fnpimxwqlzlvuminrmi75uef\",\"time_u
 
 const testpost_delete = "{\"did\":\"did:plc:3oar65whvsdaxcnwniqthtju\",\"time_us\":1731877159220103,\"type\":\"com\",\"kind\":\"commit\",\"commit\":{\"rev\":\"3lb6cdgpo7y2b\",\"type\":\"d\",\"operation\":\"delete\",\"collection\":\"app.bsky.feed.post\",\"rkey\":\"3lb6ccogqzs2i\"}}"
 
+const tagged_post = "{\"did\":\"did:plc:jkbczecxe4n5l36wbumr64kr\",\"time_us\":1732563223100851,\"type\":\"com\",\"kind\":\"commit\",\"commit\":{\"rev\":\"3lbsbbq5uvh2y\",\"type\":\"c\",\"operation\":\"create\",\"collection\":\"app.bsky.feed.post\",\"rkey\":\"3lbsbbnx5vs2q\",\"record\":{\"$type\":\"app.bsky.feed.post\",\"createdAt\":\"2024-11-25T19:33:39.417Z\",\"embed\":{\"$type\":\"app.bsky.embed.images\",\"images\":[{\"alt\":\"\",\"aspectRatio\":{\"height\":1592,\"width\":1740},\"image\":{\"$type\":\"blob\",\"ref\":{\"$link\":\"bafkreihcmtfdtvu7wyvl6cxldl7fnybxnrhkljeb2ttrktkvcfshyfcn24\"},\"mimeType\":\"image/jpeg\",\"size\":963304}}]},\"facets\":[{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"kidlitart\"}],\"index\":{\"byteEnd\":26,\"byteStart\":16}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"illustration\"}],\"index\":{\"byteEnd\":40,\"byteStart\":27}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"marker\"}],\"index\":{\"byteEnd\":48,\"byteStart\":41}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"ohuhu\"}],\"index\":{\"byteEnd\":55,\"byteStart\":49}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"arr\"}],\"index\":{\"byteEnd\":60,\"byteStart\":56}}],\"langs\":[\"en\"],\"text\":\"So... Topeica? \\n#kidlitart #illustration #marker #ohuhu #arr\"},\"cid\":\"bafyreibidxpb6krxukipjvkr5jcnlfldjjblca6vja2urhhddkx4pztkmq\"}}"
+
 // gleeunit test functions end in `_test`
 pub fn hello_world_test() {
   1
@@ -60,4 +62,11 @@ pub fn extract_text_test() {
   let assert Ok(parsed_delete) = message_parser.post_from_json(testpost_delete)
   message_parser.get_filtered_text(parsed_delete)
   |> should.equal(Error(Nil))
+}
+
+pub fn extract_tags_test() {
+  let assert Ok(parsed) = message_parser.post_from_json(tagged_post)
+
+  message_parser.get_tags(parsed)
+  |> should.equal(["kidlitart", "illustration", "marker", "ohuhu", "arr"])
 }
