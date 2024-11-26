@@ -157,9 +157,10 @@ pub fn get_tags(post: BlueskyPost) -> List(String) {
     {
       use commit <- option.then(post.commit)
       use record <- option.then(commit.record)
-      use facets <- option.then(record.facets)
+      use facets <- option.map(record.facets)
 
-      option.Some(list.map(facets, get_tags_from_facet) |> list.flatten)
+      list.map(facets, get_tags_from_facet)
+      |> list.flatten
     },
     [],
   )

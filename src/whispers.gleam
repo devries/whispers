@@ -36,14 +36,6 @@ pub fn main() {
       labels: [],
     )
 
-  let assert Ok(Nil) =
-    create_counter(
-      registry: "default",
-      name: "bluesky_tags_total",
-      help: "Total number of hashtags seen",
-      labels: ["value"],
-    )
-
   // Holder is an actor what will keep the latest post from bluesky
   let assert Ok(my_holder) = holder.new()
 
@@ -113,13 +105,22 @@ pub fn new_websocket(
               Ok(post) -> {
                 // The post will be filtered for length, style, and language
                 let _ = increment_post_count(post)
+                let tags = message_parser.get_tags(post)
+                case list.length(tags) {
+                  0 -> Nil
+                  _ ->
+                    log_debug(
+                      "Tags: "
+                      <> string.join(message_parser.get_tags(post), ", "),
+                    )
+                }
                 case message_parser.get_filtered_text(post) {
                   Ok(text) -> process.send(my_holder, holder.Put(text))
                   Error(Nil) -> Nil
                 }
               }
               Error(e) ->
-                log_debug("Error: " <> string.inspect(e) <> " on: " <> msg)
+                log_warning("Warning: " <> string.inspect(e) <> " on: " <> msg)
             }
             actor.continue(state)
           }
@@ -195,15 +196,5 @@ fn increment_post_count(post: message_parser.BlueskyPost) -> Result(Nil, Nil) {
       labels: [],
       value: 1,
     )
-  message_parser.get_tags(post)
-  |> list.map(fn(t) {
-    let _ =
-      increment_counter(
-        registry: "default",
-        name: "bluesky_tags_total",
-        labels: [t],
-        value: 1,
-      )
-  })
   Ok(Nil)
 }
