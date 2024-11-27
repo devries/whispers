@@ -3,6 +3,7 @@ import gleam/erlang/process
 import gleam/http/request
 import gleam/int
 import gleam/io
+import gleam/list
 import gleam/option.{None}
 import gleam/otp/actor
 import gleam/result
@@ -104,13 +105,22 @@ pub fn new_websocket(
               Ok(post) -> {
                 // The post will be filtered for length, style, and language
                 let _ = increment_post_count(post)
+                let tags = message_parser.get_tags(post)
+                case list.length(tags) {
+                  0 -> Nil
+                  _ ->
+                    log_debug(
+                      "Tags: "
+                      <> string.join(message_parser.get_tags(post), ", "),
+                    )
+                }
                 case message_parser.get_filtered_text(post) {
                   Ok(text) -> process.send(my_holder, holder.Put(text))
                   Error(Nil) -> Nil
                 }
               }
               Error(e) ->
-                log_debug("Error: " <> string.inspect(e) <> " on: " <> msg)
+                log_warning("Warning: " <> string.inspect(e) <> " on: " <> msg)
             }
             actor.continue(state)
           }
@@ -179,15 +189,12 @@ fn log_warning(message: String) {
 fn increment_post_count(post: message_parser.BlueskyPost) -> Result(Nil, Nil) {
   use commit <- result.try(option.to_result(post.commit, Nil))
   use _ <- result.try(option.to_result(commit.record, Nil))
-  let inc =
+  let _ =
     increment_counter(
       registry: "default",
       name: "bluesky_posts_total",
       labels: [],
       value: 1,
     )
-  case inc {
-    Ok(_) -> Ok(Nil)
-    Error(_) -> Error(Nil)
-  }
+  Ok(Nil)
 }
