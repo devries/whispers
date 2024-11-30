@@ -27,6 +27,8 @@ pub fn main() {
 
   log_info("Starting")
 
+  // Now let's stop when we get an interrupt signal
+
   // Create a prometheus counter to hold the count of posts
   let assert Ok(Nil) =
     create_counter(

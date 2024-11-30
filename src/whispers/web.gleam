@@ -1,5 +1,5 @@
 import birl
-import gleam/bytes_builder
+import gleam/bytes_tree
 import gleam/erlang/process
 import gleam/http
 import gleam/http/request
@@ -7,7 +7,7 @@ import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
-import gleam/string_builder.{type StringBuilder}
+import gleam/string_tree.{type StringTree}
 import nakai
 import nakai/attr
 import nakai/html
@@ -36,7 +36,7 @@ pub fn middleware(
 
 // I am using nakai to build my HTML. This is a relatively simple main index
 // page.
-pub fn full_page() -> StringBuilder {
+pub fn full_page() -> StringTree {
   let url = "https://whispers.unnecessary.tech"
   let title = "Whispers in the Dark"
   let description = "Real-time text-only posts from Bluesky"
@@ -81,19 +81,19 @@ pub fn full_page() -> StringBuilder {
       ]),
     ],
   )
-  |> nakai.to_string_builder
+  |> nakai.to_string_tree
 }
 
 // This HTML fragment has the post text within a div with a class attribute
 // for styling. It's also built with nakai.
-pub fn quote_html(ctx: Context) -> StringBuilder {
+pub fn quote_html(ctx: Context) -> StringTree {
   let text = case process.call(ctx.my_holder, holder.Get, 100) {
     Ok(v) -> v
     Error(Nil) -> "No message available"
   }
 
   html.Fragment([html.div([attr.class("content")], [html.Text(text)])])
-  |> nakai.to_inline_string_builder
+  |> nakai.to_inline_string_tree
 }
 
 // I also decided it might be fun to just grab the text. I add a newline so
@@ -152,8 +152,8 @@ pub fn detail_log_request(
 
 fn get_body_size(body: wisp.Body) -> Result(Int, Nil) {
   case body {
-    wisp.Text(sb) -> Ok(string_builder.byte_size(sb))
-    wisp.Bytes(bb) -> Ok(bytes_builder.byte_size(bb))
+    wisp.Text(sb) -> Ok(string_tree.byte_size(sb))
+    wisp.Bytes(bb) -> Ok(bytes_tree.byte_size(bb))
     wisp.File(_) -> Error(Nil)
     wisp.Empty -> Ok(0)
   }
