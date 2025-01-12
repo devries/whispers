@@ -15,6 +15,8 @@ const testpost_delete = "{\"did\":\"did:plc:3oar65whvsdaxcnwniqthtju\",\"time_us
 
 const tagged_post = "{\"did\":\"did:plc:jkbczecxe4n5l36wbumr64kr\",\"time_us\":1732563223100851,\"type\":\"com\",\"kind\":\"commit\",\"commit\":{\"rev\":\"3lbsbbq5uvh2y\",\"type\":\"c\",\"operation\":\"create\",\"collection\":\"app.bsky.feed.post\",\"rkey\":\"3lbsbbnx5vs2q\",\"record\":{\"$type\":\"app.bsky.feed.post\",\"createdAt\":\"2024-11-25T19:33:39.417Z\",\"embed\":{\"$type\":\"app.bsky.embed.images\",\"images\":[{\"alt\":\"\",\"aspectRatio\":{\"height\":1592,\"width\":1740},\"image\":{\"$type\":\"blob\",\"ref\":{\"$link\":\"bafkreihcmtfdtvu7wyvl6cxldl7fnybxnrhkljeb2ttrktkvcfshyfcn24\"},\"mimeType\":\"image/jpeg\",\"size\":963304}}]},\"facets\":[{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"kidlitart\"}],\"index\":{\"byteEnd\":26,\"byteStart\":16}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"illustration\"}],\"index\":{\"byteEnd\":40,\"byteStart\":27}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"marker\"}],\"index\":{\"byteEnd\":48,\"byteStart\":41}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"ohuhu\"}],\"index\":{\"byteEnd\":55,\"byteStart\":49}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"arr\"}],\"index\":{\"byteEnd\":60,\"byteStart\":56}}],\"langs\":[\"en\"],\"text\":\"So... Topeica? \\n#kidlitart #illustration #marker #ohuhu #arr\"},\"cid\":\"bafyreibidxpb6krxukipjvkr5jcnlfldjjblca6vja2urhhddkx4pztkmq\"}}"
 
+const japanese_post = "{\"did\":\"did:plc:twksn5rslmdht57uwemuc4nw\",\"time_us\":1736180321915908,\"kind\":\"commit\",\"commit\":{\"rev\":\"3lf3jxoszuh2z\",\"operation\":\"create\",\"collection\":\"app.bsky.feed.post\",\"rkey\":\"3lf3jxosszp2z\",\"record\":{\"$type\":\"app.bsky.feed.post\",\"createdAt\":\"2025-01-06T16:18:40.3023553Z\",\"embed\":{\"$type\":\"app.bsky.embed.external\",\"external\":{\"description\":\"沖縄県浦添市にあるアットホームなピアノ教室。グランドピアノを備えた広いレッスンルームで丁寧な指導を提供。技術向上と音楽の楽しさを学べる。\",\"thumb\":{\"$type\":\"blob\",\"ref\":{\"$link\":\"bafkreihj2wliydctc4liusxoa6gy2yvoouyfplezudhoagoczo6ud3sgry\"},\"mimeType\":\"image/webp\",\"size\":128362},\"title\":\"こすもすピアノ教室（沖縄県/個人・レッスン）\",\"uri\":\"https://www.music-school.net/web/detail/22635\"}},\"facets\":[{\"features\":[{\"$type\":\"app.bsky.richtext.facet#link\",\"tag\":null,\"uri\":\"https://www.music-school.net/web/detail/22635\"}],\"index\":{\"byteEnd\":355,\"byteStart\":310}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"沖縄ピアノ教室\",\"uri\":null}],\"index\":{\"byteEnd\":283,\"byteStart\":261}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"音楽教育\",\"uri\":null}],\"index\":{\"byteEnd\":297,\"byteStart\":284}},{\"features\":[{\"$type\":\"app.bsky.richtext.facet#tag\",\"tag\":\"発表会\",\"uri\":null}],\"index\":{\"byteEnd\":308,\"byteStart\":298}}],\"text\":\"こすもすピアノ教室（個人・レッスン）\\n沖縄県浦添市にあるアットホームなピアノ教室。グランドピアノを備えた広いレッスンルームで丁寧な指導を提供。技術向上と音楽の楽しさを学べる。\\n\\n#沖縄ピアノ教室\\n#音楽教育\\n#発表会\\n\\nhttps://www.music-school.net/web/detail/22635\\n\"},\"cid\":\"bafyreid4icpjx6ybuh557wmpluyr324ekl33kqyhsuf26zidox5brzh6ki\"}}"
+
 // gleeunit test functions end in `_test`
 pub fn hello_world_test() {
   1
@@ -32,6 +34,11 @@ pub fn post_decode_test() {
   |> should.equal(
     "😂😂 omg I’m sorry, I didn’t mean to call you out. Is your air sign Libra?",
   )
+}
+
+pub fn japanese_post_decode_test() {
+  message_parser.post_from_json(japanese_post)
+  |> should.be_ok()
 }
 
 pub fn account_decode_test() {

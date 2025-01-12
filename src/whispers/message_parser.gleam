@@ -91,8 +91,8 @@ pub fn feature_decoder(
     BlueskyFeature,
     dynamic.field("$type", of: dynamic.string),
     dynamic.optional_field("did", dynamic.string),
-    dynamic.optional_field("uri", dynamic.string),
-    dynamic.optional_field("tag", dynamic.string),
+    optional_nullable_field("uri", dynamic.string),
+    optional_nullable_field("tag", dynamic.string),
   )(v)
 }
 
@@ -170,4 +170,21 @@ pub fn get_tags_from_facet(facet: BlueskyFacet) -> List(String) {
   facet.features
   |> list.map(fn(feature) { feature.tag })
   |> option.values
+}
+
+pub fn optional_nullable_field(
+  named name: a,
+  of inner_type: dynamic.Decoder(b),
+) -> dynamic.Decoder(Option(b)) {
+  fn(value) {
+    use maybe_field <- result.map(dynamic.optional_field(
+      name,
+      dynamic.optional(inner_type),
+    )(value))
+
+    case maybe_field {
+      option.None -> option.None
+      option.Some(inside) -> inside
+    }
+  }
 }
