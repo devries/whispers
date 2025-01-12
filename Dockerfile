@@ -1,13 +1,13 @@
-FROM ghcr.io/gleam-lang/gleam:v1.5.1-erlang-alpine
+FROM ghcr.io/gleam-lang/gleam:v1.7.0-erlang-alpine
 
 # Add project code
-COPY . /build/
+COPY . /builder/
 
 # Compile the project
-RUN cd /build \
+RUN cd /builder \
   && gleam export erlang-shipment \
   && mv build/erlang-shipment /app \
-  && rm -r /build
+  && rm -r /builder
 
 # Run the server
 WORKDIR /app
